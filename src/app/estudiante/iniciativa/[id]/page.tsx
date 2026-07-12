@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireEstudiante } from '@/lib/auth';
 import { inscribirse } from '@/lib/iniciativas/acciones';
-import EncabezadoRol from '@/components/ui/EncabezadoRol';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +28,7 @@ export default async function DetalleIniciativaPage({
   const { data: ini } = await admin
     .from('iniciativas')
     .select(
-      'id, nombre, descripcion, tipo_causa, fecha_jornada, lat, lng, cupo_max, horas_otorgadas, estado, organizaciones(nombre, verificada), financiamientos(empresas(nombre))',
+      'id, nombre, descripcion, tipo_causa, fecha_jornada, lat, lng, cupo_max, horas_otorgadas, estado, organizaciones(nombre, verificada), financiamientos(empresas(nombre)), zonas(nombre)',
     )
     .eq('id', id)
     .single();
@@ -47,6 +46,10 @@ export default async function DetalleIniciativaPage({
       ? fin.empresas[0]
       : fin.empresas
     : null;
+  const zonaRel = ini.zonas;
+  const zonaNombre = Array.isArray(zonaRel)
+    ? zonaRel[0]?.nombre
+    : (zonaRel as { nombre: string } | null)?.nombre;
 
   const [{ count: inscritos }, { data: miInscripcion }] = await Promise.all([
     admin
@@ -67,10 +70,8 @@ export default async function DetalleIniciativaPage({
   const msg = sp.estado ? MENSAJE[sp.estado] : null;
 
   return (
-    <main className="flex flex-1 flex-col">
-      <EncabezadoRol titulo="Detalle" subtitulo={ini.nombre} />
-
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-3 px-4 py-4">
+    <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-4 py-4">
         <Link href="/estudiante" className="text-sm font-medium text-brand-mid">
           ← Catálogo
         </Link>
@@ -117,16 +118,14 @@ export default async function DetalleIniciativaPage({
 
         <div className="pk-card p-4 text-sm">
           <div className="font-semibold text-brand-dark">Punto de encuentro</div>
-          <div className="text-muted">
-            {ini.lat.toFixed(5)}, {ini.lng.toFixed(5)}
-          </div>
+          <div className="text-ink">📍 {zonaNombre ?? 'Zona de la jornada'}</div>
           <a
-            href={`https://www.openstreetmap.org/?mlat=${ini.lat}&mlon=${ini.lng}#map=17/${ini.lat}/${ini.lng}`}
+            href={`https://www.google.com/maps/search/?api=1&query=${ini.lat},${ini.lng}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-brand-mid hover:text-brand-dark"
+            className="mt-1 inline-block font-medium text-brand-mid hover:text-brand-dark"
           >
-            Ver en el mapa →
+            Cómo llegar →
           </a>
         </div>
 
@@ -153,6 +152,6 @@ export default async function DetalleIniciativaPage({
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

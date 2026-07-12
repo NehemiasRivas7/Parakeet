@@ -24,6 +24,7 @@ export type IniciativaCatalogo = IniciativaMapa & {
 };
 
 const TODOS = 'Todas';
+const CERCA = 'Cerca de mí';
 
 export default function CatalogoEstudiante({
   iniciativas,
@@ -42,6 +43,7 @@ export default function CatalogoEstudiante({
   ];
   const zonas = [
     TODOS,
+    CERCA,
     ...Array.from(
       new Set(iniciativas.map((i) => i.zona_nombre).filter((z): z is string => !!z)),
     ).sort(),
@@ -50,7 +52,8 @@ export default function CatalogoEstudiante({
   const filtradas = iniciativas.filter(
     (i) =>
       (fCategoria === TODOS || i.categoria === fCategoria) &&
-      (fZona === TODOS || i.zona_nombre === fZona) &&
+      // "Cerca de mí" es un mock: por ahora no filtra por ubicación real.
+      (fZona === TODOS || fZona === CERCA || i.zona_nombre === fZona) &&
       (!soloConCupo || i.cupos_restantes > 0),
   );
 
@@ -176,7 +179,8 @@ export default function CatalogoEstudiante({
       ) : (
         <div className="relative min-h-0 flex-1 px-3 pb-3">
           <div className="h-full w-full overflow-hidden rounded-2xl border border-brand-soft/70">
-            <MapaIniciativas iniciativas={filtradas} />
+            {/* conZonas: el voluntario también ve los puntos contaminados en vivo */}
+            <MapaIniciativas iniciativas={filtradas} conZonas />
           </div>
         </div>
       )}

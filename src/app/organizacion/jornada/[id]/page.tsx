@@ -15,10 +15,13 @@ function unwrap<T>(rel: T | T[] | null): T | null {
 
 export default async function JornadaPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ cerrada?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
   const { org } = await requireOrganizacion();
   const admin = createAdminClient();
 
@@ -63,6 +66,12 @@ export default async function JornadaPage({
           <Link href="/organizacion" className="text-sm font-medium text-brand-mid">
             ← Panel
           </Link>
+          {sp.cerrada === '1' && (
+            <div className="mt-2 rounded-xl bg-brand px-3 py-2 text-sm font-semibold text-white shadow-[0_10px_22px_-10px_rgba(16,148,45,0.6)]">
+              ¡Jornada cerrada! Horas y sellos acreditados — la zona bajó de
+              nivel en el mapa.
+            </div>
+          )}
           <h2 className="mb-1 mt-2 text-lg font-bold text-brand-dark">
             {ini.nombre}
           </h2>

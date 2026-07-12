@@ -1,7 +1,4 @@
-import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireEstudiante } from '@/lib/auth';
-import EncabezadoRol from '@/components/ui/EncabezadoRol';
 import CatalogoEstudiante, {
   type IniciativaCatalogo,
 } from '@/components/iniciativa/CatalogoEstudiante';
@@ -9,7 +6,6 @@ import CatalogoEstudiante, {
 export const dynamic = 'force-dynamic';
 
 export default async function EstudiantePage() {
-  await requireEstudiante();
   const admin = createAdminClient();
 
   const { data: inis } = await admin
@@ -66,19 +62,5 @@ export default async function EstudiantePage() {
     };
   });
 
-  return (
-    <main className="flex h-dvh flex-col">
-      <EncabezadoRol titulo="Iniciativas" subtitulo="Inscribite y cumplí tus horas" />
-      <div className="mx-auto w-full max-w-md px-4 py-3">
-        <Link
-          href="/estudiante/horas"
-          className="flex items-center justify-between rounded-xl bg-brand-tint px-3.5 py-2.5 text-sm font-semibold text-brand-dark transition hover:bg-brand-soft"
-        >
-          <span>🏅 Mis horas y stamps</span>
-          <span>→</span>
-        </Link>
-      </div>
-      <CatalogoEstudiante iniciativas={iniciativas} />
-    </main>
-  );
+  return <CatalogoEstudiante iniciativas={iniciativas} />;
 }

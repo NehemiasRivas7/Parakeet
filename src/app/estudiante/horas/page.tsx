@@ -1,7 +1,5 @@
-import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireEstudiante } from '@/lib/auth';
-import EncabezadoRol from '@/components/ui/EncabezadoRol';
 import MetricasImpacto, {
   type ResultadoMetrica,
 } from '@/components/impacto/MetricasImpacto';
@@ -73,14 +71,8 @@ export default async function HorasPage() {
     requeridas > 0 ? Math.min(100, Math.round((acumuladas / requeridas) * 100)) : 0;
 
   return (
-    <main className="flex flex-1 flex-col">
-      <EncabezadoRol titulo="Green Passport" subtitulo={estudiante.institucion} />
-
-      <div className="mx-auto w-full max-w-md flex-1 px-4 py-4">
-        <Link href="/estudiante" className="text-sm font-medium text-brand-mid">
-          ← Catálogo
-        </Link>
-
+    <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="mx-auto w-full max-w-md px-4 py-4">
         {/* Progreso */}
         <section className="my-4 rounded-2xl bg-gradient-to-br from-brand-dark to-brand p-5 text-white shadow-[0_14px_30px_-12px_rgba(0,99,65,0.5)]">
           <div className="flex items-end justify-between">
@@ -214,6 +206,6 @@ export default async function HorasPage() {
           )}
         </section>
       </div>
-    </main>
+    </div>
   );
 }

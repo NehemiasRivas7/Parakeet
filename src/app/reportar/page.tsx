@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { TIPOS_CONTAMINACION } from '@/lib/reportes/tipos';
@@ -21,8 +21,11 @@ const SelectorUbicacion = dynamic(
 
 const CENTRO_DEFAULT = { lat: 13.4936, lng: -89.3823 };
 
-export default function ReportarPage() {
+function ReportarForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  // Si venís desde tu sesión (voluntario), volvés ahí en vez de a la vista pública.
+  const volver = params.get('volver');
   const [coords, setCoords] = useState(CENTRO_DEFAULT);
   const [recenterKey, setRecenterKey] = useState(0);
   const [geoEstado, setGeoEstado] = useState<
@@ -77,7 +80,11 @@ export default function ReportarPage() {
       if (!resp.ok || !data.ok) {
         throw new Error(data.reason ?? 'No se pudo enviar el reporte.');
       }
-      router.push(`/mapa?zona=${data.zona_id}&ok=1`);
+      if (volver) {
+        router.push(volver);
+      } else {
+        router.push(`/mapa?zona=${data.zona_id}&ok=1`);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error inesperado.');
       setEnviando(false);
@@ -90,7 +97,10 @@ export default function ReportarPage() {
         <h1 className="text-xl font-bold text-brand-dark">
           Reportar punto contaminado
         </h1>
-        <Link href="/" className="text-sm font-medium text-muted hover:text-accent">
+        <Link
+          href={volver || '/'}
+          className="text-sm font-medium text-muted hover:text-accent"
+        >
           Cancelar
         </Link>
       </header>
@@ -191,5 +201,15 @@ export default function ReportarPage() {
         {enviando ? 'Enviando…' : 'Enviar reporte'}
       </button>
     </main>
+  );
+}
+
+export default function ReportarPage() {
+  return (
+    <Suspense
+      fallback={<div className="p-6 text-sm text-muted">Cargando…</div>}
+    >
+      <ReportarForm />
+    </Suspense>
   );
 }

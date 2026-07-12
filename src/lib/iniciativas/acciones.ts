@@ -259,7 +259,9 @@ export async function cerrarJornada(formData: FormData) {
   revalidatePath('/estudiante');
   revalidatePath('/estudiante/horas');
   revalidatePath('/mapa');
-  redirect(`/mapa?zona=${ini.zona_id ?? ''}&recuperada=1`);
+  // Quedarse en la sesión de la organización: la misma página muestra el
+  // resumen de impacto (antes/después). El color de la zona se actualiza solo.
+  redirect(`/organizacion/jornada/${id}?cerrada=1`);
 }
 
 // ── Empresa: financiar (financiable -> financiada) + registro ──────────────

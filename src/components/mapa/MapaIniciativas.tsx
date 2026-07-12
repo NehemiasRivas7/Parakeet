@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import CapaZonasVivas from './CapaZonasVivas';
 
 export type IniciativaMapa = {
   id: string;
@@ -37,10 +38,13 @@ export default function MapaIniciativas({
   iniciativas,
   hrefBase = '/estudiante/iniciativa',
   cta = 'Ver detalle →',
+  conZonas = false,
 }: {
   iniciativas: IniciativaMapa[];
   hrefBase?: string;
   cta?: string;
+  // Muestra también las zonas contaminadas en vivo (heat + círculos por gravedad).
+  conZonas?: boolean;
 }) {
   const center: [number, number] =
     iniciativas.length > 0
@@ -54,6 +58,7 @@ export default function MapaIniciativas({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
       <AjustarTamano />
+      {conZonas && <CapaZonasVivas />}
       {iniciativas.map((ini) => (
         <Marker key={ini.id} position={[ini.lat, ini.lng]} icon={pin}>
           <Popup>
