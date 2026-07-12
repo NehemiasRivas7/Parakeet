@@ -1,65 +1,53 @@
-import Image from "next/image";
+import Link from 'next/link';
+import MapaPublico from '@/components/mapa/MapaPublico';
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  // Next 16: searchParams es una Promise
+  searchParams: Promise<{ zona?: string; ok?: string }>;
+}) {
+  const sp = await searchParams;
+  const reporteEnviado = sp.ok === '1';
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    // h-dvh = altura DEFINIDA (viewport). Necesaria para que el mapa (h-full)
+    // resuelva su altura; con flex-1/min-h-full heredaria 0 y el heatmap
+    // reventaria (getImageData sobre canvas de alto 0).
+    <main className="flex h-dvh flex-col">
+      <header className="flex items-center justify-between px-4 py-3">
+        <div>
+          <h1 className="text-lg font-bold">Parakeet</h1>
+          <p className="text-xs text-neutral-500">
+            Mapa de puntos contaminados
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div className="flex items-center gap-3">
+          <Link href="/login" className="text-sm text-neutral-500 underline">
+            Ingresar
+          </Link>
+          <Link
+            href="/reportar"
+            className="min-h-11 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            + Reportar
+          </Link>
         </div>
-      </main>
-    </div>
+      </header>
+
+      {reporteEnviado && (
+        <div className="mx-4 mb-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
+          ¡Reporte recibido! Tu zona ya está marcada en el mapa.
+        </div>
+      )}
+
+      <section className="relative min-h-0 flex-1">
+        <MapaPublico focusZonaId={sp.zona} />
+      </section>
+
+      <footer className="px-4 py-3 text-center text-xs text-neutral-400">
+        Turismo ecológico y sostenible · Reto EcoTrack
+      </footer>
+    </main>
   );
 }
