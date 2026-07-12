@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { HOME_POR_ROL } from '@/lib/roles';
+import Logo from '@/components/ui/Logo';
 import type { RolUsuario } from '@/lib/database.types';
 
 const CUENTAS_DEMO: { email: string; rol: string }[] = [
@@ -63,9 +64,7 @@ function LoginForm() {
           ← Mapa público
         </Link>
         <div className="mt-4 flex items-center gap-2.5">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand text-xl text-white shadow-[0_10px_22px_-8px_rgba(16,148,45,0.6)]">
-            🦜
-          </span>
+          <Logo className="h-11 w-11 rounded-2xl shadow-[0_10px_22px_-8px_rgba(16,148,45,0.55)]" />
           <div>
             <h1 className="text-2xl font-bold leading-none text-brand-dark">
               Parakeet

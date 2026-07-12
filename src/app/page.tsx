@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import MapaPublico from '@/components/mapa/MapaPublico';
+import Logo from '@/components/ui/Logo';
 
 export default async function Home({
   searchParams,
@@ -13,9 +14,7 @@ export default async function Home({
     <main className="flex h-dvh flex-col">
       <header className="flex items-center justify-between border-b border-brand-soft/70 bg-white/70 px-4 py-3 backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand text-base text-white shadow-[0_6px_14px_-4px_rgba(16,148,45,0.6)]">
-            🦜
-          </span>
+          <Logo className="h-9 w-9 rounded-xl shadow-[0_6px_14px_-4px_rgba(16,148,45,0.5)]" />
           <div>
             <h1 className="text-lg font-bold leading-none text-brand-dark">
               Parakeet
