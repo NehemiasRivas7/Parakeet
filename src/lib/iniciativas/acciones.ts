@@ -3,8 +3,31 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireOrganizacion, requireEmpresa, requireRol } from '@/lib/auth';
+import { requireOrganizacion, requireEmpresa } from '@/lib/auth';
 import { aplicarTransicion } from '@/lib/iniciativas/transiciones';
+import { haversineM } from '@/lib/zonas/gravedad';
+
+// Busca la zona mas cercana a un punto dentro de su radio (misma logica que
+// POST /api/reportes). Devuelve el id o null.
+async function zonaMasCercana(
+  admin: ReturnType<typeof createAdminClient>,
+  lat: number,
+  lng: number,
+): Promise<string | null> {
+  const { data: zonas } = await admin
+    .from('zonas')
+    .select('id, lat_centro, lng_centro, radio_m');
+  let zonaId: string | null = null;
+  let best = Infinity;
+  for (const z of zonas ?? []) {
+    const d = haversineM(lat, lng, z.lat_centro, z.lng_centro);
+    if (d <= z.radio_m && d < best) {
+      best = d;
+      zonaId = z.id;
+    }
+  }
+  return zonaId;
+}
 
 // Verifica que una iniciativa pertenece a la organizacion dada.
 async function esDeLaOrg(
@@ -29,7 +52,7 @@ export async function crearIniciativa(formData: FormData) {
   const descripcion = String(formData.get('descripcion') ?? '').trim();
   const tipo_causa = String(formData.get('tipo_causa') ?? '').trim();
   const fecha_jornada = String(formData.get('fecha_jornada') ?? '');
-  const zona_id = String(formData.get('zona_id') ?? '') || null;
+  let zona_id = String(formData.get('zona_id') ?? '') || null;
   const lat = Number(formData.get('lat'));
   const lng = Number(formData.get('lng'));
   const cupo_max = Number(formData.get('cupo_max'));
@@ -53,6 +76,12 @@ export async function crearIniciativa(formData: FormData) {
     redirect('/organizacion/nueva?error=campos');
   }
 
+  // Si no vino zona explicita, auto-asignar la mas cercana al punto elegido.
+  // Necesario para que el cierre de jornada (Plan 5) baje la gravedad de la zona.
+  if (!zona_id) {
+    zona_id = await zonaMasCercana(admin, lat, lng);
+  }
+
   const { error } = await admin.from('iniciativas').insert({
     organizacion_id: org.id,
     zona_id,
@@ -73,14 +102,15 @@ export async function crearIniciativa(formData: FormData) {
   redirect('/organizacion');
 }
 
-// ── Organizacion: enviar a revision (borrador -> en_revision) ──────────────
-export async function enviarARevision(formData: FormData) {
+// ── Organizacion: publicar para financiamiento (borrador -> financiable) ───
+// Sin paso de admin: la iniciativa queda visible a empresas de inmediato.
+export async function publicarIniciativa(formData: FormData) {
   const { org } = await requireOrganizacion();
   const admin = createAdminClient();
   const id = String(formData.get('id') ?? '');
   if (!(await esDeLaOrg(admin, id, org.id))) throw new Error('No autorizado');
 
-  const { error } = await aplicarTransicion(admin, id, 'en_revision');
+  const { error } = await aplicarTransicion(admin, id, 'financiable');
   if (error) throw new Error(error);
   revalidatePath('/organizacion');
 }
@@ -95,17 +125,6 @@ export async function abrirInscripciones(formData: FormData) {
   const { error } = await aplicarTransicion(admin, id, 'inscripcion_abierta');
   if (error) throw new Error(error);
   revalidatePath('/organizacion');
-}
-
-// ── Admin: aprobar (en_revision -> financiable) ────────────────────────────
-export async function aprobarIniciativa(formData: FormData) {
-  await requireRol('admin');
-  const admin = createAdminClient();
-  const id = String(formData.get('id') ?? '');
-
-  const { error } = await aplicarTransicion(admin, id, 'financiable');
-  if (error) throw new Error(error);
-  revalidatePath('/admin');
 }
 
 // ── Empresa: financiar (financiable -> financiada) + registro ──────────────
