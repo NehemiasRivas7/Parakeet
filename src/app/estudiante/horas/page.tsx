@@ -2,8 +2,21 @@ import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireEstudiante } from '@/lib/auth';
 import EncabezadoRol from '@/components/ui/EncabezadoRol';
+import MetricasImpacto, {
+  type ResultadoMetrica,
+} from '@/components/impacto/MetricasImpacto';
 
 export const dynamic = 'force-dynamic';
+
+const BADGES = [
+  { umbral: 1, nombre: 'Primera jornada' },
+  { umbral: 3, nombre: 'Tres jornadas' },
+  { umbral: 5, nombre: 'Cinco jornadas' },
+];
+
+function unwrap<T>(rel: T | T[] | null): T | null {
+  return Array.isArray(rel) ? (rel[0] ?? null) : rel;
+}
 
 export default async function HorasPage() {
   const { estudiante } = await requireEstudiante();
@@ -13,7 +26,7 @@ export default async function HorasPage() {
     admin
       .from('inscripciones')
       .select(
-        'id, iniciativas(nombre, fecha_jornada, horas_otorgadas), asistencias(asistio, horas_acreditadas)',
+        'id, iniciativas(id, nombre, fecha_jornada, horas_otorgadas), asistencias(asistio, horas_acreditadas)',
       )
       .eq('estudiante_id', estudiante.id)
       .order('inscrito_en', { ascending: false }),
@@ -24,21 +37,44 @@ export default async function HorasPage() {
       .order('otorgado_en', { ascending: false }),
   ]);
 
+  const historial = inscripciones ?? [];
+  const listaStamps = stamps ?? [];
+  const jornadas = listaStamps.length;
+
+  // Impacto agregado de las jornadas donde asistió.
+  const idsAsistidas = historial
+    .filter((h) => unwrap(h.asistencias)?.asistio)
+    .map((h) => unwrap(h.iniciativas)?.id)
+    .filter((x): x is string => !!x);
+
+  let impacto: ResultadoMetrica[] = [];
+  if (idsAsistidas.length > 0) {
+    const { data: res } = await admin
+      .from('resultados_jornada')
+      .select('metrica, valor, unidad')
+      .in('iniciativa_id', idsAsistidas);
+    const acc = new Map<string, ResultadoMetrica>();
+    for (const r of res ?? []) {
+      const clave = `${r.metrica}|${r.unidad}`;
+      const prev = acc.get(clave);
+      acc.set(clave, {
+        metrica: r.metrica,
+        unidad: r.unidad,
+        valor: (prev?.valor ?? 0) + (r.valor ?? 0),
+      });
+    }
+    impacto = Array.from(acc.values());
+  }
+
   const acumuladas = estudiante.horas_acumuladas;
   const requeridas = estudiante.horas_requeridas;
   const restantes = Math.max(0, requeridas - acumuladas);
-  const pct = requeridas > 0 ? Math.min(100, Math.round((acumuladas / requeridas) * 100)) : 0;
-
-  const historial = inscripciones ?? [];
-  const listaStamps = stamps ?? [];
-
-  function unwrap<T>(rel: T | T[] | null): T | null {
-    return Array.isArray(rel) ? (rel[0] ?? null) : rel;
-  }
+  const pct =
+    requeridas > 0 ? Math.min(100, Math.round((acumuladas / requeridas) * 100)) : 0;
 
   return (
     <main className="flex flex-1 flex-col">
-      <EncabezadoRol titulo="Mis horas" subtitulo={estudiante.institucion} />
+      <EncabezadoRol titulo="Green Passport" subtitulo={estudiante.institucion} />
 
       <div className="mx-auto w-full max-w-md flex-1 px-4 py-4">
         <Link href="/estudiante" className="text-sm font-medium text-brand-mid">
@@ -58,30 +94,76 @@ export default async function HorasPage() {
             />
           </div>
           <p className="mt-2 text-xs text-white/85">
-            {restantes > 0 ? `Te faltan ${restantes} h` : '¡Horas completas! 🎉'}
+            {restantes > 0 ? `Te faltan ${restantes} h` : '¡Horas completas!'}
           </p>
         </section>
 
-        {/* Stamps */}
+        {/* Tu impacto */}
+        {impacto.length > 0 && (
+          <section className="mb-5">
+            <h2 className="mb-2 font-semibold text-brand-dark">
+              Tu impacto acumulado
+            </h2>
+            <MetricasImpacto metricas={impacto} />
+          </section>
+        )}
+
+        {/* Badges */}
+        <section className="mb-5">
+          <h2 className="mb-2 font-semibold text-brand-dark">Badges</h2>
+          <div className="grid grid-cols-3 gap-2">
+            {BADGES.map((b) => {
+              const logrado = jornadas >= b.umbral;
+              return (
+                <div
+                  key={b.umbral}
+                  className={`flex flex-col items-center rounded-2xl border p-3 text-center ${
+                    logrado
+                      ? 'border-brand bg-brand-tint'
+                      : 'border-brand-soft/60 bg-white opacity-60'
+                  }`}
+                >
+                  <span
+                    className={`flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold ${
+                      logrado
+                        ? 'bg-brand text-white'
+                        : 'bg-brand-soft text-brand-mid'
+                    }`}
+                  >
+                    {logrado ? '✓' : b.umbral}
+                  </span>
+                  <span className="mt-1.5 text-[11px] font-medium text-brand-dark">
+                    {b.nombre}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Sellos (green passport) */}
         <section className="mb-5">
           <h2 className="mb-2 font-semibold text-brand-dark">
-            Stamps ({listaStamps.length})
+            Sellos ({jornadas})
           </h2>
-          {listaStamps.length === 0 ? (
+          {jornadas === 0 ? (
             <p className="text-sm text-muted">
-              Aún no tenés stamps. Ganás uno al asistir a una jornada.
+              Aún no tenés sellos. Ganás uno al asistir a una jornada.
             </p>
           ) : (
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-3">
               {listaStamps.map((s, i) => {
                 const ini = unwrap(s.iniciativas);
                 return (
                   <div
                     key={i}
                     title={ini?.nombre ?? s.tipo}
-                    className="flex aspect-square flex-col items-center justify-center rounded-2xl border border-brand-soft bg-brand-tint text-center"
+                    className="flex aspect-square flex-col items-center justify-center rounded-full border-2 border-dashed border-brand bg-brand-tint text-center"
                   >
-                    <span className="text-2xl">🏅</span>
+                    <span className="text-lg font-bold text-brand">✓</span>
+                    <span className="text-[8px] font-semibold uppercase text-brand-mid">
+                      Parakeet
+                    </span>
                   </div>
                 );
               })}

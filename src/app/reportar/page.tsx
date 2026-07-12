@@ -77,7 +77,7 @@ export default function ReportarPage() {
       if (!resp.ok || !data.ok) {
         throw new Error(data.reason ?? 'No se pudo enviar el reporte.');
       }
-      router.push(`/?zona=${data.zona_id}&ok=1`);
+      router.push(`/mapa?zona=${data.zona_id}&ok=1`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error inesperado.');
       setEnviando(false);

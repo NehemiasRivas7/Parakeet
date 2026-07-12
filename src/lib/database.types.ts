@@ -470,7 +470,16 @@ export type Database = {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      cerrar_jornada: {
+        Args: {
+          p_iniciativa: string;
+          p_asistieron: string[];
+          p_metricas: Json;
+        };
+        Returns: undefined;
+      };
+    };
     Enums: {
       rol_usuario: RolUsuario;
       nivel_gravedad: NivelGravedad;

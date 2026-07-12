@@ -216,6 +216,52 @@ export async function abrirInscripciones(formData: FormData) {
   revalidatePath('/estudiante');
 }
 
+// ── Organizacion: cerrar jornada (transaccional vía RPC) ───────────────────
+export async function cerrarJornada(formData: FormData) {
+  const { org } = await requireOrganizacion();
+  const admin = createAdminClient();
+  const id = String(formData.get('id') ?? '');
+
+  const { data: ini } = await admin
+    .from('iniciativas')
+    .select('organizacion_id, estado, zona_id')
+    .eq('id', id)
+    .single();
+  if (!ini || ini.organizacion_id !== org.id) throw new Error('No autorizado');
+  if (!['inscripcion_abierta', 'en_curso'].includes(ini.estado)) {
+    throw new Error('La jornada no se puede cerrar en este estado');
+  }
+
+  // Inscripciones marcadas como asistieron (checkboxes name="asistio").
+  const asistieron = formData.getAll('asistio').map(String);
+
+  // Métricas cuantificadas (arrays paralelos del formulario).
+  const nombres = formData.getAll('metrica_nombre').map(String);
+  const valores = formData.getAll('metrica_valor').map(String);
+  const unidades = formData.getAll('metrica_unidad').map(String);
+  const metricas = nombres
+    .map((n, i) => ({
+      metrica: n.trim(),
+      valor: Number(valores[i]),
+      unidad: (unidades[i] ?? '').trim(),
+    }))
+    .filter((m) => m.metrica && Number.isFinite(m.valor));
+
+  const { error } = await admin.rpc('cerrar_jornada', {
+    p_iniciativa: id,
+    p_asistieron: asistieron,
+    p_metricas: metricas,
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath('/organizacion');
+  revalidatePath('/empresa/dashboard');
+  revalidatePath('/estudiante');
+  revalidatePath('/estudiante/horas');
+  revalidatePath('/mapa');
+  redirect(`/mapa?zona=${ini.zona_id ?? ''}&recuperada=1`);
+}
+
 // ── Empresa: financiar (financiable -> financiada) + registro ──────────────
 export async function financiarIniciativa(formData: FormData) {
   const { empresa } = await requireEmpresa();

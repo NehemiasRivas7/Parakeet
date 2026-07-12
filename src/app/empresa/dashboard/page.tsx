@@ -1,11 +1,20 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireEmpresa } from '@/lib/auth';
 import BadgeEstado from '@/components/iniciativa/BadgeEstado';
+import TarjetaAntesDespues from '@/components/impacto/TarjetaAntesDespues';
+import MetricasImpacto, {
+  type ResultadoMetrica,
+} from '@/components/impacto/MetricasImpacto';
 import { LABEL_NIVEL } from '@/lib/zonas/gravedad';
 import type { EstadoIniciativa, NivelGravedad } from '@/lib/database.types';
 
 export const dynamic = 'force-dynamic';
 
+type Zona = {
+  nombre: string;
+  nivel_inicial: NivelGravedad;
+  nivel_gravedad: NivelGravedad;
+};
 type IniRel = {
   id: string;
   nombre: string;
@@ -13,7 +22,7 @@ type IniRel = {
   cupo_max: number;
   horas_otorgadas: number;
   fecha_jornada: string;
-  zonas: { nombre: string; nivel_gravedad: NivelGravedad } | { nombre: string; nivel_gravedad: NivelGravedad }[] | null;
+  zonas: Zona | Zona[] | null;
 };
 
 function unwrap<T>(rel: T | T[] | null): T | null {
@@ -27,7 +36,7 @@ export default async function EmpresaDashboardPage() {
   const { data: fins } = await admin
     .from('financiamientos')
     .select(
-      'monto, confirmado_en, iniciativas(id, nombre, estado, cupo_max, horas_otorgadas, fecha_jornada, zonas(nombre, nivel_gravedad))',
+      'monto, confirmado_en, iniciativas(id, nombre, estado, cupo_max, horas_otorgadas, fecha_jornada, zonas(nombre, nivel_inicial, nivel_gravedad))',
     )
     .eq('empresa_id', empresa.id)
     .order('confirmado_en', { ascending: false });
@@ -57,6 +66,33 @@ export default async function EmpresaDashboardPage() {
     0,
   );
 
+  // Impacto de las iniciativas completadas que financió esta empresa.
+  const completadas = registros.filter((r) => r.ini?.estado === 'completada');
+  const idsCompletadas = completadas
+    .map((r) => r.ini?.id)
+    .filter((x): x is string => !!x);
+  let impacto: ResultadoMetrica[] = [];
+  if (idsCompletadas.length > 0) {
+    const { data: res } = await admin
+      .from('resultados_jornada')
+      .select('metrica, valor, unidad')
+      .in('iniciativa_id', idsCompletadas);
+    const acc = new Map<string, ResultadoMetrica>();
+    for (const r of res ?? []) {
+      const clave = `${r.metrica}|${r.unidad}`;
+      const prev = acc.get(clave);
+      acc.set(clave, {
+        metrica: r.metrica,
+        unidad: r.unidad,
+        valor: (prev?.valor ?? 0) + (r.valor ?? 0),
+      });
+    }
+    impacto = Array.from(acc.values());
+  }
+  const zonaRepresentativa = completadas
+    .map((r) => unwrap(r.ini?.zonas ?? null))
+    .find((z): z is Zona => !!z);
+
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-md px-4 py-4">
@@ -74,13 +110,31 @@ export default async function EmpresaDashboardPage() {
           </div>
           <div className="pk-card p-3">
             <div className="text-2xl font-bold text-brand-dark">{totalInscritos}</div>
-            <div className="text-xs text-muted">Estudiantes</div>
+            <div className="text-xs text-muted">Voluntarios</div>
           </div>
           <div className="pk-card col-span-2 p-3">
             <div className="text-2xl font-bold text-brand-dark">{horasImpacto}</div>
             <div className="text-xs text-muted">Horas de impacto generadas</div>
           </div>
         </section>
+
+        {/* Impacto generado (iniciativas completadas) */}
+        {(impacto.length > 0 || zonaRepresentativa) && (
+          <section className="mb-6">
+            <h2 className="mb-2 font-semibold text-brand-dark">
+              Impacto generado
+            </h2>
+            {zonaRepresentativa && (
+              <div className="mb-3">
+                <TarjetaAntesDespues
+                  nivelInicial={zonaRepresentativa.nivel_inicial}
+                  nivelActual={zonaRepresentativa.nivel_gravedad}
+                />
+              </div>
+            )}
+            <MetricasImpacto metricas={impacto} />
+          </section>
+        )}
 
         <h2 className="mb-3 font-semibold text-brand-dark">Mis financiamientos</h2>
 

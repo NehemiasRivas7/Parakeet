@@ -9,7 +9,7 @@ export const HOME_POR_ROL: Record<RolUsuario, string> = {
 };
 
 export const LABEL_ROL: Record<RolUsuario, string> = {
-  estudiante: 'Estudiante',
+  estudiante: 'Voluntario',
   organizacion: 'Organización',
   empresa: 'Empresa',
   admin: 'Admin',

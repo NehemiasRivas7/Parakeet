@@ -61,7 +61,7 @@ export default async function EmpresaPage({
                 </p>
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted">
                   <div>📅 {ini.fecha_jornada}</div>
-                  <div>👥 {ini.cupo_max} estudiantes</div>
+                  <div>👥 {ini.cupo_max} voluntarios</div>
                   <div>⏱️ {ini.horas_otorgadas} h c/u</div>
                   <div>🌱 {ini.cupo_max * ini.horas_otorgadas} h de impacto</div>
                 </dl>

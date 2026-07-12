@@ -10,7 +10,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Parakeet — Mapa de puntos contaminados",
   description:
-    "Reportá puntos contaminados en tu zona turística. Voluntariado que conecta estudiantes, comunidad y empresas para recuperar el destino.",
+    "Reportá puntos contaminados en tu zona turística. Voluntariado que conecta voluntarios, comunidad y empresas para recuperar el destino.",
 };
 
 export default function RootLayout({

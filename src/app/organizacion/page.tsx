@@ -133,9 +133,27 @@ export default async function OrganizacionPage() {
                 )}
 
                 {ini.estado === 'inscripcion_abierta' && (
-                  <p className="mt-3 text-xs font-medium text-brand-mid">
-                    Inscripción abierta · {inscritos}/{ini.cupo_max} cupos ocupados.
-                  </p>
+                  <div className="mt-3 flex flex-col gap-2">
+                    <p className="text-xs font-medium text-brand-mid">
+                      Inscripción abierta · {inscritos}/{ini.cupo_max} cupos
+                      ocupados.
+                    </p>
+                    <Link
+                      href={`/organizacion/jornada/${ini.id}`}
+                      className="pk-btn pk-btn-primary min-h-10 w-full"
+                    >
+                      Gestionar jornada
+                    </Link>
+                  </div>
+                )}
+
+                {ini.estado === 'completada' && (
+                  <Link
+                    href={`/organizacion/jornada/${ini.id}`}
+                    className="pk-btn pk-btn-outline mt-3 min-h-10 w-full"
+                  >
+                    Ver impacto
+                  </Link>
                 )}
               </li>
             );

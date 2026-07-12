@@ -12,7 +12,7 @@ const CUENTAS_DEMO: { email: string; rol: string }[] = [
   { email: 'admin@parakeet.sv', rol: 'Admin' },
   { email: 'org@parakeet.sv', rol: 'Organización' },
   { email: 'empresa@parakeet.sv', rol: 'Empresa' },
-  { email: 'estudiante@parakeet.sv', rol: 'Estudiante' },
+  { email: 'estudiante@parakeet.sv', rol: 'Voluntario' },
 ];
 
 function LoginForm() {
