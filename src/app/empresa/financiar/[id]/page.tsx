@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireEmpresa } from '@/lib/auth';
 import { financiarIniciativa } from '@/lib/iniciativas/acciones';
-import EncabezadoRol from '@/components/ui/EncabezadoRol';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,10 +32,13 @@ export default async function FinanciarPage({
     'min-h-11 w-full rounded-xl border border-neutral-300 bg-transparent px-3 dark:border-neutral-600';
 
   return (
-    <main className="flex flex-1 flex-col">
-      <EncabezadoRol titulo="Financiar iniciativa" subtitulo={ini.nombre} />
+    <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="mx-auto w-full max-w-md px-4 py-4">
+        <Link href="/empresa" className="text-sm text-neutral-500 underline">
+          ← Catálogo
+        </Link>
+        <h2 className="mb-3 mt-2 text-lg font-bold">{ini.nombre}</h2>
 
-      <div className="mx-auto w-full max-w-md flex-1 px-4 py-4">
         <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
           ⚠️ <strong>Simulación</strong> — no se procesa ningún cobro real. Este
           formulario es una demostración del flujo de financiamiento.
@@ -98,6 +100,6 @@ export default async function FinanciarPage({
           </>
         )}
       </div>
-    </main>
+    </div>
   );
 }

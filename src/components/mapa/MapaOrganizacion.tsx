@@ -6,14 +6,13 @@ import {
   TileLayer,
   Circle,
   Marker,
-  Popup,
   useMap,
   useMapEvents,
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { createClient } from '@/lib/supabase/client';
-import { COLOR_NIVEL, LABEL_NIVEL } from '@/lib/zonas/gravedad';
+import { COLOR_NIVEL } from '@/lib/zonas/gravedad';
 import type { NivelGravedad } from '@/lib/database.types';
 
 type Zona = {
@@ -100,16 +99,14 @@ export default function MapaOrganizacion({
             center={[z.lat_centro, z.lng_centro]}
             radius={z.radio_m}
             pathOptions={{ color, fillColor: color, fillOpacity: 0.2, weight: 2 }}
-          >
-            <Popup>
-              <div className="text-sm">
-                <div className="font-semibold">{z.nombre}</div>
-                <div>
-                  {LABEL_NIVEL[z.nivel_gravedad]} · {z.total_reportes} reportes
-                </div>
-              </div>
-            </Popup>
-          </Circle>
+            eventHandlers={{
+              // Sin esto, el circulo captura el click y no se puede seleccionar
+              // DENTRO de la zona (que es lo ideal). Seleccionamos el punto tocado.
+              click(e) {
+                onSeleccionar(e.latlng.lat, e.latlng.lng);
+              },
+            }}
+          />
         );
       })}
       {seleccion && (

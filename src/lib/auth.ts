@@ -59,3 +59,15 @@ export async function requireEmpresa() {
   if (!empresa) redirect('/login?error=sin-empresa');
   return { usuario, empresa };
 }
+
+export async function requireEstudiante() {
+  const usuario = await requireRol('estudiante');
+  const supabase = await createClient();
+  const { data: estudiante } = await supabase
+    .from('estudiantes')
+    .select('id, institucion, horas_requeridas, horas_acumuladas')
+    .eq('usuario_id', usuario.id)
+    .single();
+  if (!estudiante) redirect('/login?error=sin-estudiante');
+  return { usuario, estudiante };
+}

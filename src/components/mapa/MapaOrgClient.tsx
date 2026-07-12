@@ -20,7 +20,7 @@ export default function MapaOrgClient() {
   );
 
   return (
-    <div className="relative flex-1">
+    <div className="relative min-h-0 flex-1">
       <MapaOrganizacion seleccion={seleccion} onSeleccionar={(lat, lng) => setSeleccion({ lat, lng })} />
 
       <div className="pointer-events-none absolute inset-x-0 top-2 z-[1000] flex justify-center px-4">

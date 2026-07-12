@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireOrganizacion, requireEmpresa } from '@/lib/auth';
+import { requireOrganizacion, requireEmpresa, requireEstudiante } from '@/lib/auth';
 import { aplicarTransicion } from '@/lib/iniciativas/transiciones';
 import { haversineM } from '@/lib/zonas/gravedad';
 
@@ -102,6 +102,94 @@ export async function crearIniciativa(formData: FormData) {
   redirect('/organizacion');
 }
 
+// ── Organizacion: editar (solo antes de financiada) ────────────────────────
+export async function editarIniciativa(formData: FormData) {
+  const { org } = await requireOrganizacion();
+  const admin = createAdminClient();
+  const id = String(formData.get('id') ?? '');
+
+  const { data: actual } = await admin
+    .from('iniciativas')
+    .select('organizacion_id, estado')
+    .eq('id', id)
+    .single();
+  if (!actual || actual.organizacion_id !== org.id) throw new Error('No autorizado');
+  if (!['borrador', 'financiable'].includes(actual.estado)) {
+    throw new Error('Solo se puede editar antes del financiamiento');
+  }
+
+  const nombre = String(formData.get('nombre') ?? '').trim();
+  const descripcion = String(formData.get('descripcion') ?? '').trim();
+  const tipo_causa = String(formData.get('tipo_causa') ?? '').trim();
+  const fecha_jornada = String(formData.get('fecha_jornada') ?? '');
+  const lat = Number(formData.get('lat'));
+  const lng = Number(formData.get('lng'));
+  const cupo_max = Number(formData.get('cupo_max'));
+  const horas_otorgadas = Number(formData.get('horas_otorgadas'));
+  const monto_requerido = Number(formData.get('monto_requerido'));
+
+  if (
+    !nombre ||
+    !descripcion ||
+    !tipo_causa ||
+    !fecha_jornada ||
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lng) ||
+    !Number.isFinite(cupo_max) ||
+    cupo_max <= 0 ||
+    !Number.isFinite(horas_otorgadas) ||
+    horas_otorgadas <= 0 ||
+    !Number.isFinite(monto_requerido) ||
+    monto_requerido < 0
+  ) {
+    redirect(`/organizacion/editar/${id}?error=campos`);
+  }
+
+  const zona_id = (await zonaMasCercana(admin, lat, lng)) ?? null;
+
+  const { error } = await admin
+    .from('iniciativas')
+    .update({
+      nombre,
+      descripcion,
+      tipo_causa,
+      fecha_jornada,
+      lat,
+      lng,
+      zona_id,
+      cupo_max,
+      horas_otorgadas,
+      monto_requerido,
+    })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath('/organizacion');
+  redirect('/organizacion');
+}
+
+// ── Organizacion: eliminar (solo antes de financiada) ──────────────────────
+export async function eliminarIniciativa(formData: FormData) {
+  const { org } = await requireOrganizacion();
+  const admin = createAdminClient();
+  const id = String(formData.get('id') ?? '');
+
+  const { data: actual } = await admin
+    .from('iniciativas')
+    .select('organizacion_id, estado')
+    .eq('id', id)
+    .single();
+  if (!actual || actual.organizacion_id !== org.id) throw new Error('No autorizado');
+  if (!['borrador', 'financiable'].includes(actual.estado)) {
+    throw new Error('Solo se puede eliminar antes del financiamiento');
+  }
+
+  const { error } = await admin.from('iniciativas').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath('/organizacion');
+}
+
 // ── Organizacion: publicar para financiamiento (borrador -> financiable) ───
 // Sin paso de admin: la iniciativa queda visible a empresas de inmediato.
 export async function publicarIniciativa(formData: FormData) {
@@ -125,6 +213,7 @@ export async function abrirInscripciones(formData: FormData) {
   const { error } = await aplicarTransicion(admin, id, 'inscripcion_abierta');
   if (error) throw new Error(error);
   revalidatePath('/organizacion');
+  revalidatePath('/estudiante');
 }
 
 // ── Empresa: financiar (financiable -> financiada) + registro ──────────────
@@ -155,5 +244,49 @@ export async function financiarIniciativa(formData: FormData) {
   if (error) throw new Error(error);
 
   revalidatePath('/empresa');
+  revalidatePath('/empresa/dashboard');
+  revalidatePath('/organizacion');
   redirect('/empresa?financiada=1');
+}
+
+// ── Estudiante: inscribirse a una iniciativa ───────────────────────────────
+export async function inscribirse(formData: FormData) {
+  const { estudiante } = await requireEstudiante();
+  const admin = createAdminClient();
+  const id = String(formData.get('id') ?? '');
+
+  const { data: ini } = await admin
+    .from('iniciativas')
+    .select('estado, cupo_max')
+    .eq('id', id)
+    .single();
+  if (!ini) throw new Error('Iniciativa no encontrada');
+  if (ini.estado !== 'inscripcion_abierta') {
+    redirect(`/estudiante/iniciativa/${id}?estado=cerrada`);
+  }
+
+  // Bloquear si el cupo esta lleno.
+  const { count } = await admin
+    .from('inscripciones')
+    .select('*', { count: 'exact', head: true })
+    .eq('iniciativa_id', id);
+  if ((count ?? 0) >= ini.cupo_max) {
+    redirect(`/estudiante/iniciativa/${id}?estado=lleno`);
+  }
+
+  const { error } = await admin
+    .from('inscripciones')
+    .insert({ iniciativa_id: id, estudiante_id: estudiante.id });
+  if (error) {
+    // 23505 = violacion de unique (iniciativa_id, estudiante_id) -> ya inscrito
+    if (error.code === '23505') {
+      redirect(`/estudiante/iniciativa/${id}?estado=duplicado`);
+    }
+    throw new Error(error.message);
+  }
+
+  revalidatePath('/estudiante');
+  revalidatePath('/empresa/dashboard');
+  revalidatePath('/organizacion');
+  redirect(`/estudiante/iniciativa/${id}?estado=ok`);
 }

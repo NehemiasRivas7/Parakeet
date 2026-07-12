@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { crearIniciativa } from '@/lib/iniciativas/acciones';
+import { crearIniciativa, editarIniciativa } from '@/lib/iniciativas/acciones';
+import { CATEGORIAS, CATEGORIA_OTRO } from '@/lib/iniciativas/categorias';
 
 const SelectorUbicacion = dynamic(
   () => import('@/components/mapa/SelectorUbicacion'),
@@ -17,27 +18,52 @@ const SelectorUbicacion = dynamic(
   },
 );
 
-export default function FormNuevaIniciativa({
-  initialLat,
-  initialLng,
-  zonaId,
-  zonaNombre,
-  huboError,
-}: {
-  initialLat: number;
-  initialLng: number;
+export type ValoresIniciativa = {
+  lat: number;
+  lng: number;
   zonaId: string | null;
   zonaNombre: string | null;
+  nombre: string;
+  descripcion: string;
+  tipo_causa: string;
+  fecha_jornada: string;
+  cupo_max: string;
+  horas_otorgadas: string;
+  monto_requerido: string;
+};
+
+export default function FormIniciativa({
+  modo,
+  id,
+  initial,
+  huboError,
+}: {
+  modo: 'crear' | 'editar';
+  id?: string;
+  initial: ValoresIniciativa;
   huboError: boolean;
 }) {
-  const [coords, setCoords] = useState({ lat: initialLat, lng: initialLng });
+  const [coords, setCoords] = useState({ lat: initial.lat, lng: initial.lng });
+
+  // Categoria: si la inicial es una conocida -> select; si no y hay texto -> "Otro".
+  const esConocida = (CATEGORIAS as readonly string[]).includes(
+    initial.tipo_causa,
+  );
+  const [categoria, setCategoria] = useState(
+    esConocida ? initial.tipo_causa : initial.tipo_causa ? CATEGORIA_OTRO : '',
+  );
+  const [categoriaOtro, setCategoriaOtro] = useState(
+    esConocida ? '' : initial.tipo_causa,
+  );
+  const tipoCausaFinal =
+    categoria === CATEGORIA_OTRO ? categoriaOtro : categoria;
 
   const inputCls =
     'min-h-11 w-full rounded-xl border border-neutral-300 bg-transparent px-3 dark:border-neutral-600';
 
   return (
     <form
-      action={crearIniciativa}
+      action={modo === 'editar' ? editarIniciativa : crearIniciativa}
       className="mx-auto flex w-full max-w-md flex-1 flex-col gap-3 px-4 py-4"
     >
       {huboError && (
@@ -47,11 +73,13 @@ export default function FormNuevaIniciativa({
         </p>
       )}
 
-      {zonaNombre && (
+      {initial.zonaNombre && (
         <p className="rounded-lg bg-sky-50 p-2 text-sm text-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
-          Zona: <strong>{zonaNombre}</strong> — ubicación heredada.
+          Zona: <strong>{initial.zonaNombre}</strong> — ubicación heredada.
         </p>
       )}
+
+      {modo === 'editar' && <input type="hidden" name="id" value={id} />}
 
       {/* Ubicación con mapa chico */}
       <label className="text-sm font-semibold">Ubicación</label>
@@ -70,14 +98,15 @@ export default function FormNuevaIniciativa({
 
       <input type="hidden" name="lat" value={coords.lat} />
       <input type="hidden" name="lng" value={coords.lng} />
-      <input type="hidden" name="zona_id" value={zonaId ?? ''} />
+      <input type="hidden" name="zona_id" value={initial.zonaId ?? ''} />
+      <input type="hidden" name="tipo_causa" value={tipoCausaFinal} />
 
       <label className="text-sm font-semibold">Nombre</label>
       <input
         name="nombre"
         required
         placeholder="Ej. Limpieza de playa El Tunco"
-        defaultValue={zonaNombre ? `Limpieza de ${zonaNombre}` : ''}
+        defaultValue={initial.nombre}
         className={inputCls}
       />
 
@@ -87,19 +116,45 @@ export default function FormNuevaIniciativa({
         required
         rows={3}
         placeholder="¿Qué se hará en la jornada?"
+        defaultValue={initial.descripcion}
         className="w-full rounded-xl border border-neutral-300 bg-transparent p-3 dark:border-neutral-600"
       />
 
-      <label className="text-sm font-semibold">Tipo de causa</label>
-      <input
-        name="tipo_causa"
+      <label className="text-sm font-semibold">Categoría</label>
+      <select
+        value={categoria}
+        onChange={(e) => setCategoria(e.target.value)}
         required
-        placeholder="Ej. Limpieza costera"
         className={inputCls}
-      />
+      >
+        <option value="" disabled>
+          Elegí una categoría…
+        </option>
+        {CATEGORIAS.map((c) => (
+          <option key={c} value={c}>
+            {c}
+          </option>
+        ))}
+        <option value={CATEGORIA_OTRO}>Otro…</option>
+      </select>
+      {categoria === CATEGORIA_OTRO && (
+        <input
+          value={categoriaOtro}
+          onChange={(e) => setCategoriaOtro(e.target.value)}
+          required
+          placeholder="Escribí la categoría"
+          className={inputCls}
+        />
+      )}
 
       <label className="text-sm font-semibold">Fecha de la jornada</label>
-      <input name="fecha_jornada" type="date" required className={inputCls} />
+      <input
+        name="fecha_jornada"
+        type="date"
+        required
+        defaultValue={initial.fecha_jornada}
+        className={inputCls}
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -110,6 +165,7 @@ export default function FormNuevaIniciativa({
             min={1}
             required
             placeholder="20"
+            defaultValue={initial.cupo_max}
             className={inputCls}
           />
         </div>
@@ -121,6 +177,7 @@ export default function FormNuevaIniciativa({
             min={1}
             required
             placeholder="8"
+            defaultValue={initial.horas_otorgadas}
             className={inputCls}
           />
         </div>
@@ -134,6 +191,7 @@ export default function FormNuevaIniciativa({
         step="0.01"
         required
         placeholder="500.00"
+        defaultValue={initial.monto_requerido}
         className={inputCls}
       />
 
@@ -145,7 +203,7 @@ export default function FormNuevaIniciativa({
           Cancelar
         </Link>
         <button className="min-h-12 flex-1 rounded-xl bg-emerald-600 px-4 font-semibold text-white">
-          Guardar borrador
+          {modo === 'editar' ? 'Guardar cambios' : 'Guardar borrador'}
         </button>
       </div>
     </form>

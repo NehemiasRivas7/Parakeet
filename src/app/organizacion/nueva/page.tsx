@@ -1,7 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireOrganizacion } from '@/lib/auth';
-import EncabezadoRol from '@/components/ui/EncabezadoRol';
-import FormNuevaIniciativa from '@/components/iniciativa/FormNuevaIniciativa';
+import FormIniciativa from '@/components/iniciativa/FormIniciativa';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,15 +39,27 @@ export default async function NuevaIniciativaPage({
   if (!Number.isFinite(lng)) lng = CENTRO_DEFAULT.lng;
 
   return (
-    <main className="flex flex-1 flex-col">
-      <EncabezadoRol titulo="Nueva iniciativa" subtitulo="Guardá y publicá para financiamiento" />
-      <FormNuevaIniciativa
-        initialLat={lat}
-        initialLng={lng}
-        zonaId={zonaId}
-        zonaNombre={zonaNombre}
+    <div className="min-h-0 flex-1 overflow-y-auto">
+      <h2 className="mx-auto w-full max-w-md px-4 pt-4 text-lg font-bold">
+        Nueva iniciativa
+      </h2>
+      <FormIniciativa
+        modo="crear"
+        initial={{
+          lat,
+          lng,
+          zonaId,
+          zonaNombre,
+          nombre: '',
+          descripcion: '',
+          tipo_causa: '',
+          fecha_jornada: '',
+          cupo_max: '',
+          horas_otorgadas: '',
+          monto_requerido: '',
+        }}
         huboError={sp.error === 'campos'}
       />
-    </main>
+    </div>
   );
 }

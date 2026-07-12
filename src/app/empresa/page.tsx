@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireEmpresa } from '@/lib/auth';
-import EncabezadoRol from '@/components/ui/EncabezadoRol';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +9,7 @@ export default async function EmpresaPage({
 }: {
   searchParams: Promise<{ financiada?: string }>;
 }) {
-  const { empresa } = await requireEmpresa();
+  await requireEmpresa();
   const sp = await searchParams;
   const admin = createAdminClient();
 
@@ -25,14 +24,11 @@ export default async function EmpresaPage({
   const lista = iniciativas ?? [];
 
   return (
-    <main className="flex flex-1 flex-col">
-      <EncabezadoRol titulo={empresa.nombre} subtitulo="Catálogo financiable (RSE)" />
-
-      <div className="mx-auto w-full max-w-md flex-1 px-4 py-4">
+    <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="mx-auto w-full max-w-md px-4 py-4">
         {sp.financiada === '1' && (
           <div className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
-            ¡Financiamiento confirmado! La organización ya puede abrir
-            inscripciones.
+            ¡Financiamiento confirmado! Lo ves en la pestaña Financiamientos.
           </div>
         )}
 
@@ -62,15 +58,13 @@ export default async function EmpresaPage({
                 <h3 className="font-semibold leading-tight">{ini.nombre}</h3>
                 <p className="text-xs text-neutral-500">
                   {org?.nombre ?? 'Organización'}
-                  {zona?.nombre ? ` · ${zona.nombre}` : ''}
+                  {zona?.nombre ? ` · ${zona.nombre}` : ''} · {ini.tipo_causa}
                 </p>
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-neutral-500">
                   <div>📅 {ini.fecha_jornada}</div>
                   <div>👥 {ini.cupo_max} estudiantes</div>
                   <div>⏱️ {ini.horas_otorgadas} h c/u</div>
-                  <div>
-                    🌱 {ini.cupo_max * ini.horas_otorgadas} h de impacto
-                  </div>
+                  <div>🌱 {ini.cupo_max * ini.horas_otorgadas} h de impacto</div>
                 </dl>
                 <div className="mt-3 flex items-center justify-between">
                   <span className="text-lg font-bold">
@@ -88,6 +82,6 @@ export default async function EmpresaPage({
           })}
         </ul>
       </div>
-    </main>
+    </div>
   );
 }
