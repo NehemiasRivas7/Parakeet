@@ -69,12 +69,13 @@ export default async function EstudiantePage() {
   return (
     <main className="flex h-dvh flex-col">
       <EncabezadoRol titulo="Iniciativas" subtitulo="Inscribite y cumplí tus horas" />
-      <div className="mx-auto w-full max-w-md px-4 pt-3">
+      <div className="mx-auto w-full max-w-md px-4 py-3">
         <Link
           href="/estudiante/horas"
-          className="mb-1 inline-block text-sm text-emerald-700 underline dark:text-emerald-400"
+          className="flex items-center justify-between rounded-xl bg-brand-tint px-3.5 py-2.5 text-sm font-semibold text-brand-dark transition hover:bg-brand-soft"
         >
-          Ver mis horas y stamps →
+          <span>🏅 Mis horas y stamps</span>
+          <span>→</span>
         </Link>
       </div>
       <CatalogoEstudiante iniciativas={iniciativas} />

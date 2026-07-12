@@ -8,7 +8,7 @@ import type { NivelGravedad } from '@/lib/database.types';
 const HeatmapZonas = dynamic(() => import('./HeatmapZonas'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-sm text-neutral-500 dark:bg-neutral-900">
+    <div className="flex h-full w-full items-center justify-center bg-brand-tint text-sm text-muted">
       Cargando mapa…
     </div>
   ),
@@ -20,11 +20,11 @@ export default function MapaPublico({ focusZonaId }: { focusZonaId?: string }) {
   return (
     <div className="relative h-full w-full">
       <HeatmapZonas focusZonaId={focusZonaId} />
-      <div className="pointer-events-none absolute bottom-3 left-3 z-[1000] rounded-lg bg-white/90 p-2 text-xs shadow-md dark:bg-neutral-800/90">
-        <div className="mb-1 font-semibold">Gravedad</div>
-        <ul className="space-y-0.5">
+      <div className="pointer-events-none absolute bottom-3 left-3 z-[1000] rounded-xl border border-brand-soft/70 bg-white/90 p-2.5 text-xs shadow-lg backdrop-blur">
+        <div className="mb-1 font-semibold text-brand-dark">Gravedad</div>
+        <ul className="space-y-1">
           {NIVELES.map((n) => (
-            <li key={n} className="flex items-center gap-1.5">
+            <li key={n} className="flex items-center gap-1.5 text-ink">
               <span
                 className="inline-block h-3 w-3 rounded-full"
                 style={{ backgroundColor: COLOR_NIVEL[n] }}

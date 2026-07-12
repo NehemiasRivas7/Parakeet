@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 const MapaOrganizacion = dynamic(() => import('./MapaOrganizacion'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-sm text-neutral-500 dark:bg-neutral-900">
+    <div className="flex h-full w-full items-center justify-center bg-brand-tint text-sm text-muted">
       Cargando mapa…
     </div>
   ),
@@ -23,8 +23,8 @@ export default function MapaOrgClient() {
     <div className="relative min-h-0 flex-1">
       <MapaOrganizacion seleccion={seleccion} onSeleccionar={(lat, lng) => setSeleccion({ lat, lng })} />
 
-      <div className="pointer-events-none absolute inset-x-0 top-2 z-[1000] flex justify-center px-4">
-        <p className="pointer-events-auto rounded-full bg-white/90 px-3 py-1.5 text-xs shadow-md dark:bg-neutral-800/90">
+      <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex justify-center px-4">
+        <p className="pointer-events-auto rounded-full border border-brand-soft/70 bg-white/90 px-3.5 py-1.5 text-xs font-medium text-brand-dark shadow-md backdrop-blur">
           Tocá un punto del mapa para crear una iniciativa ahí.
         </p>
       </div>
@@ -38,7 +38,7 @@ export default function MapaOrgClient() {
                 `/organizacion/nueva?lat=${seleccion.lat}&lng=${seleccion.lng}`,
               )
             }
-            className="min-h-12 rounded-full bg-emerald-600 px-6 font-semibold text-white shadow-lg"
+            className="pk-btn pk-btn-primary min-h-12 rounded-full px-6 text-base shadow-lg"
           >
             Crear iniciativa aquí →
           </button>

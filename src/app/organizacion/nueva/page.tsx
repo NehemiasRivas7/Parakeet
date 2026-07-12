@@ -40,7 +40,7 @@ export default async function NuevaIniciativaPage({
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <h2 className="mx-auto w-full max-w-md px-4 pt-4 text-lg font-bold">
+      <h2 className="mx-auto w-full max-w-md px-4 pt-4 text-lg font-bold text-brand-dark">
         Nueva iniciativa
       </h2>
       <FormIniciativa

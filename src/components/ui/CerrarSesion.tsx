@@ -13,7 +13,7 @@ export default function CerrarSesion() {
         router.push('/login');
         router.refresh();
       }}
-      className="text-sm text-neutral-500 underline"
+      className="shrink-0 rounded-full border border-brand-soft px-3 py-1.5 text-sm font-medium text-muted transition hover:border-accent/40 hover:text-accent"
     >
       Salir
     </button>

@@ -28,16 +28,17 @@ export default async function FinanciarPage({
     ? ini.organizaciones[0]
     : (ini.organizaciones as { nombre: string } | null);
 
-  const inputCls =
-    'min-h-11 w-full rounded-xl border border-neutral-300 bg-transparent px-3 dark:border-neutral-600';
+  const inputCls = 'pk-input';
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-md px-4 py-4">
-        <Link href="/empresa" className="text-sm text-neutral-500 underline">
+        <Link href="/empresa" className="text-sm font-medium text-brand-mid">
           ← Catálogo
         </Link>
-        <h2 className="mb-3 mt-2 text-lg font-bold">{ini.nombre}</h2>
+        <h2 className="mb-3 mt-2 text-lg font-bold text-brand-dark">
+          {ini.nombre}
+        </h2>
 
         <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
           ⚠️ <strong>Simulación</strong> — no se procesa ningún cobro real. Este
@@ -45,27 +46,27 @@ export default async function FinanciarPage({
         </div>
 
         {ini.estado !== 'financiable' ? (
-          <div className="rounded-xl border border-neutral-200 p-6 text-center dark:border-neutral-800">
-            <p className="text-sm text-neutral-500">
+          <div className="pk-card p-6 text-center">
+            <p className="text-sm text-muted">
               Esta iniciativa ya no está disponible para financiar (estado:{' '}
               {ini.estado}).
             </p>
             <Link
               href="/empresa"
-              className="mt-3 inline-block text-sm text-indigo-600 underline"
+              className="mt-3 inline-block text-sm font-medium text-brand-mid"
             >
               Volver al catálogo
             </Link>
           </div>
         ) : (
           <>
-            <div className="mb-4 rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
-              <p className="text-xs text-neutral-500">
+            <div className="pk-card mb-4 p-4">
+              <p className="text-xs text-muted">
                 {org?.nombre ?? 'Organización'}
               </p>
               <div className="mt-1 flex items-center justify-between">
-                <span className="text-sm">Monto a financiar</span>
-                <span className="text-2xl font-bold">
+                <span className="text-sm text-ink">Monto a financiar</span>
+                <span className="text-2xl font-bold text-brand-dark">
                   ${Number(ini.monto_requerido).toFixed(2)}
                 </span>
               </div>
@@ -93,7 +94,7 @@ export default async function FinanciarPage({
                   <input placeholder="123" className={inputCls} />
                 </div>
               </div>
-              <button className="mt-2 min-h-12 rounded-xl bg-indigo-600 px-4 font-semibold text-white">
+              <button className="pk-btn pk-btn-primary mt-2 min-h-12">
                 Confirmar financiamiento (simulado)
               </button>
             </form>

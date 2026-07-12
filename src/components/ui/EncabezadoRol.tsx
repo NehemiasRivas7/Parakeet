@@ -10,15 +10,18 @@ export default function EncabezadoRol({
   subtitulo?: string;
 }) {
   return (
-    <header className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-800">
-      <div>
-        <Link href="/" className="text-xs text-neutral-400 underline">
+    <header className="flex items-center justify-between border-b border-brand-soft/70 bg-white/70 px-4 py-3 backdrop-blur-md">
+      <div className="min-w-0">
+        <Link
+          href="/"
+          className="text-[11px] font-semibold uppercase tracking-wide text-brand-mid"
+        >
           Parakeet
         </Link>
-        <h1 className="text-lg font-bold leading-tight">{titulo}</h1>
-        {subtitulo && (
-          <p className="text-xs text-neutral-500">{subtitulo}</p>
-        )}
+        <h1 className="truncate text-lg font-bold leading-tight text-brand-dark">
+          {titulo}
+        </h1>
+        {subtitulo && <p className="truncate text-xs text-muted">{subtitulo}</p>}
       </div>
       <CerrarSesion />
     </header>

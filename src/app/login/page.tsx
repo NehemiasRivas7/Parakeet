@@ -40,7 +40,6 @@ function LoginForm() {
       setEnviando(false);
       return;
     }
-    // Traer el rol para redirigir a su home.
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -51,24 +50,29 @@ function LoginForm() {
         .select('rol')
         .eq('id', user.id)
         .single();
-      if (usuario && !next) {
-        destino = HOME_POR_ROL[usuario.rol as RolUsuario];
-      }
+      if (usuario && !next) destino = HOME_POR_ROL[usuario.rol as RolUsuario];
     }
     router.push(destino);
     router.refresh();
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-5 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-5 py-8">
       <div>
-        <Link href="/" className="text-sm text-neutral-500 underline">
+        <Link href="/" className="text-sm font-medium text-brand-mid">
           ← Mapa público
         </Link>
-        <h1 className="mt-3 text-2xl font-bold">Ingresar a Parakeet</h1>
-        <p className="text-sm text-neutral-500">
-          Acceso para organizaciones, empresas y admin.
-        </p>
+        <div className="mt-4 flex items-center gap-2.5">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand text-xl text-white shadow-[0_10px_22px_-8px_rgba(16,148,45,0.6)]">
+            🦜
+          </span>
+          <div>
+            <h1 className="text-2xl font-bold leading-none text-brand-dark">
+              Parakeet
+            </h1>
+            <p className="text-sm text-muted">Acceso para tu rol</p>
+          </div>
+        </div>
       </div>
 
       <form
@@ -84,7 +88,7 @@ function LoginForm() {
           placeholder="Correo"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="min-h-12 rounded-xl border border-neutral-300 bg-transparent px-3 dark:border-neutral-600"
+          className="pk-input"
         />
         <input
           type="password"
@@ -92,42 +96,37 @@ function LoginForm() {
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="min-h-12 rounded-xl border border-neutral-300 bg-transparent px-3 dark:border-neutral-600"
+          className="pk-input"
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={enviando}
-          className="min-h-12 rounded-xl bg-emerald-600 px-4 font-semibold text-white disabled:opacity-60"
-        >
+        {error && <p className="text-sm font-medium text-accent">{error}</p>}
+        <button type="submit" disabled={enviando} className="pk-btn pk-btn-primary mt-1">
           {enviando ? 'Ingresando…' : 'Ingresar'}
         </button>
       </form>
 
-      <div className="rounded-xl border border-dashed border-neutral-300 p-3 text-xs text-neutral-500 dark:border-neutral-700">
-        <div className="mb-1 font-semibold text-neutral-600 dark:text-neutral-300">
+      <div className="pk-card p-4">
+        <div className="mb-2 text-xs font-semibold text-brand-dark">
           Cuentas de prueba · contraseña{' '}
-          <code className="rounded bg-neutral-200 px-1 dark:bg-neutral-700">
+          <code className="rounded-md bg-brand-tint px-1.5 py-0.5 text-brand-dark">
             parakeet2026
           </code>
         </div>
-        <ul className="space-y-0.5">
+        <div className="flex flex-col gap-1.5">
           {CUENTAS_DEMO.map((c) => (
-            <li key={c.email}>
-              <button
-                type="button"
-                className="underline"
-                onClick={() => {
-                  setEmail(c.email);
-                  setPassword('parakeet2026');
-                }}
-              >
-                {c.email}
-              </button>{' '}
-              — {c.rol}
-            </li>
+            <button
+              key={c.email}
+              type="button"
+              onClick={() => {
+                setEmail(c.email);
+                setPassword('parakeet2026');
+              }}
+              className="flex items-center justify-between rounded-lg px-2 py-1.5 text-left text-sm transition hover:bg-brand-tint"
+            >
+              <span className="text-ink">{c.email}</span>
+              <span className="text-xs font-medium text-brand-mid">{c.rol}</span>
+            </button>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
@@ -135,7 +134,9 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-neutral-500">Cargando…</div>}>
+    <Suspense
+      fallback={<div className="p-6 text-sm text-muted">Cargando…</div>}
+    >
       <LoginForm />
     </Suspense>
   );

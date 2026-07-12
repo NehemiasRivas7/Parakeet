@@ -6,7 +6,7 @@ import type { IniciativaMapa } from './MapaIniciativas';
 const MapaIniciativas = dynamic(() => import('./MapaIniciativas'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-sm text-neutral-500 dark:bg-neutral-900">
+    <div className="flex h-full w-full items-center justify-center bg-brand-tint text-sm text-muted">
       Cargando mapa…
     </div>
   ),
@@ -22,7 +22,7 @@ export default function MapaIniciativasClient({
   cta?: string;
 }) {
   return (
-    <div className="relative min-h-0 flex-1">
+    <div className="relative h-full w-full">
       <MapaIniciativas iniciativas={iniciativas} hrefBase={hrefBase} cta={cta} />
     </div>
   );

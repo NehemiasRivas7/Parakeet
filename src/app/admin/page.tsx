@@ -32,24 +32,26 @@ export default async function AdminPage() {
 
       <div className="mx-auto w-full max-w-md flex-1 px-4 py-4">
         <section className="mb-5 grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-xl border border-neutral-200 p-3 dark:border-neutral-800">
-            <div className="text-2xl font-bold">{lista.length}</div>
-            <div className="text-xs text-neutral-500">Iniciativas</div>
+          <div className="pk-card p-3">
+            <div className="text-2xl font-bold text-brand-dark">{lista.length}</div>
+            <div className="text-xs text-muted">Iniciativas</div>
           </div>
-          <div className="rounded-xl border border-neutral-200 p-3 dark:border-neutral-800">
-            <div className="text-2xl font-bold">{reportes ?? 0}</div>
-            <div className="text-xs text-neutral-500">Reportes</div>
+          <div className="pk-card p-3">
+            <div className="text-2xl font-bold text-brand-dark">{reportes ?? 0}</div>
+            <div className="text-xs text-muted">Reportes</div>
           </div>
-          <div className="rounded-xl border border-neutral-200 p-3 dark:border-neutral-800">
-            <div className="text-2xl font-bold">{zonas ?? 0}</div>
-            <div className="text-xs text-neutral-500">Zonas</div>
+          <div className="pk-card p-3">
+            <div className="text-2xl font-bold text-brand-dark">{zonas ?? 0}</div>
+            <div className="text-xs text-muted">Zonas</div>
           </div>
         </section>
 
-        <h2 className="mb-3 font-semibold">Iniciativas del ecosistema</h2>
+        <h2 className="mb-3 font-semibold text-brand-dark">
+          Iniciativas del ecosistema
+        </h2>
 
         {lista.length === 0 && (
-          <p className="rounded-xl border border-dashed border-neutral-300 p-6 text-center text-sm text-neutral-500 dark:border-neutral-700">
+          <p className="rounded-2xl border border-dashed border-brand-soft p-6 text-center text-sm text-muted">
             Todavía no hay iniciativas.
           </p>
         )}
@@ -62,11 +64,13 @@ export default async function AdminPage() {
             return (
               <li
                 key={ini.id}
-                className="flex items-center justify-between gap-2 rounded-lg border border-neutral-200 px-3 py-2 dark:border-neutral-800"
+                className="flex items-center justify-between gap-2 rounded-xl border border-brand-soft/70 bg-white px-3 py-2.5"
               >
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-medium">{ini.nombre}</div>
-                  <div className="text-xs text-neutral-500">
+                  <div className="truncate text-sm font-medium text-ink">
+                    {ini.nombre}
+                  </div>
+                  <div className="text-xs text-muted">
                     {org?.nombre ?? 'Organización'}
                   </div>
                 </div>

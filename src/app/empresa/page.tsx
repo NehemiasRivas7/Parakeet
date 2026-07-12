@@ -27,17 +27,17 @@ export default async function EmpresaPage({
     <div className="min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-md px-4 py-4">
         {sp.financiada === '1' && (
-          <div className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
+          <div className="mb-3 rounded-xl border border-brand-soft bg-brand-tint px-3 py-2 text-sm font-medium text-brand-dark">
             ¡Financiamiento confirmado! Lo ves en la pestaña Financiamientos.
           </div>
         )}
 
-        <h2 className="mb-3 font-semibold">
+        <h2 className="mb-3 font-semibold text-brand-dark">
           Iniciativas por financiar ({lista.length})
         </h2>
 
         {lista.length === 0 && (
-          <p className="rounded-xl border border-dashed border-neutral-300 p-6 text-center text-sm text-neutral-500 dark:border-neutral-700">
+          <p className="rounded-2xl border border-dashed border-brand-soft p-6 text-center text-sm text-muted">
             No hay iniciativas disponibles para financiar en este momento.
           </p>
         )}
@@ -51,28 +51,27 @@ export default async function EmpresaPage({
               ? ini.zonas[0]
               : (ini.zonas as { nombre: string } | null);
             return (
-              <li
-                key={ini.id}
-                className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800"
-              >
-                <h3 className="font-semibold leading-tight">{ini.nombre}</h3>
-                <p className="text-xs text-neutral-500">
+              <li key={ini.id} className="pk-card p-4">
+                <h3 className="font-semibold leading-tight text-brand-dark">
+                  {ini.nombre}
+                </h3>
+                <p className="mt-0.5 text-xs text-muted">
                   {org?.nombre ?? 'Organización'}
                   {zona?.nombre ? ` · ${zona.nombre}` : ''} · {ini.tipo_causa}
                 </p>
-                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-neutral-500">
+                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted">
                   <div>📅 {ini.fecha_jornada}</div>
                   <div>👥 {ini.cupo_max} estudiantes</div>
                   <div>⏱️ {ini.horas_otorgadas} h c/u</div>
                   <div>🌱 {ini.cupo_max * ini.horas_otorgadas} h de impacto</div>
                 </dl>
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-lg font-bold">
+                  <span className="text-lg font-bold text-brand-dark">
                     ${Number(ini.monto_requerido).toFixed(2)}
                   </span>
                   <Link
                     href={`/empresa/financiar/${ini.id}`}
-                    className="min-h-10 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white"
+                    className="pk-btn pk-btn-primary min-h-10"
                   >
                     Financiar
                   </Link>

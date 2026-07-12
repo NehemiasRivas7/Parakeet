@@ -170,7 +170,7 @@ export default function HeatmapZonas({ focusZonaId }: { focusZonaId?: string }) 
 
   if (cargando) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-sm text-neutral-500 dark:bg-neutral-900">
+      <div className="flex h-full w-full items-center justify-center bg-brand-tint text-sm text-muted">
         Cargando mapa…
       </div>
     );

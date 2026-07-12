@@ -61,29 +61,31 @@ export default async function EmpresaDashboardPage() {
     <div className="min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-md px-4 py-4">
         {/* Métricas */}
-        <section className="mb-5 grid grid-cols-2 gap-2">
-          <div className="rounded-xl border border-neutral-200 p-3 dark:border-neutral-800">
-            <div className="text-2xl font-bold">${totalInvertido.toFixed(2)}</div>
-            <div className="text-xs text-neutral-500">Invertido</div>
+        <section className="mb-5 grid grid-cols-2 gap-2.5">
+          <div className="col-span-2 rounded-2xl bg-gradient-to-br from-brand-dark to-brand p-4 text-white shadow-[0_14px_30px_-14px_rgba(0,99,65,0.5)]">
+            <div className="text-3xl font-bold leading-none">
+              ${totalInvertido.toFixed(2)}
+            </div>
+            <div className="mt-1 text-xs text-white/80">Total invertido en RSE</div>
           </div>
-          <div className="rounded-xl border border-neutral-200 p-3 dark:border-neutral-800">
-            <div className="text-2xl font-bold">{registros.length}</div>
-            <div className="text-xs text-neutral-500">Iniciativas</div>
+          <div className="pk-card p-3">
+            <div className="text-2xl font-bold text-brand-dark">{registros.length}</div>
+            <div className="text-xs text-muted">Iniciativas</div>
           </div>
-          <div className="rounded-xl border border-neutral-200 p-3 dark:border-neutral-800">
-            <div className="text-2xl font-bold">{totalInscritos}</div>
-            <div className="text-xs text-neutral-500">Estudiantes inscritos</div>
+          <div className="pk-card p-3">
+            <div className="text-2xl font-bold text-brand-dark">{totalInscritos}</div>
+            <div className="text-xs text-muted">Estudiantes</div>
           </div>
-          <div className="rounded-xl border border-neutral-200 p-3 dark:border-neutral-800">
-            <div className="text-2xl font-bold">{horasImpacto}</div>
-            <div className="text-xs text-neutral-500">Horas de impacto</div>
+          <div className="pk-card col-span-2 p-3">
+            <div className="text-2xl font-bold text-brand-dark">{horasImpacto}</div>
+            <div className="text-xs text-muted">Horas de impacto generadas</div>
           </div>
         </section>
 
-        <h2 className="mb-3 font-semibold">Mis financiamientos</h2>
+        <h2 className="mb-3 font-semibold text-brand-dark">Mis financiamientos</h2>
 
         {registros.length === 0 && (
-          <p className="rounded-xl border border-dashed border-neutral-300 p-6 text-center text-sm text-neutral-500 dark:border-neutral-700">
+          <p className="rounded-2xl border border-dashed border-brand-soft p-6 text-center text-sm text-muted">
             Todavía no financiaste ninguna iniciativa. Mirá el catálogo o el mapa.
           </p>
         )}
@@ -94,15 +96,14 @@ export default async function EmpresaDashboardPage() {
             const zona = unwrap(r.ini.zonas);
             const inscritos = conteo[r.ini.id] ?? 0;
             return (
-              <li
-                key={idx}
-                className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800"
-              >
+              <li key={idx} className="pk-card p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold leading-tight">{r.ini.nombre}</h3>
+                  <h3 className="font-semibold leading-tight text-brand-dark">
+                    {r.ini.nombre}
+                  </h3>
                   <BadgeEstado estado={r.ini.estado} />
                 </div>
-                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-neutral-500">
+                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted">
                   <div>💵 ${r.monto.toFixed(2)}</div>
                   <div>📅 {r.ini.fecha_jornada}</div>
                   <div>

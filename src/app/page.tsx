@@ -4,48 +4,51 @@ import MapaPublico from '@/components/mapa/MapaPublico';
 export default async function Home({
   searchParams,
 }: {
-  // Next 16: searchParams es una Promise
   searchParams: Promise<{ zona?: string; ok?: string }>;
 }) {
   const sp = await searchParams;
   const reporteEnviado = sp.ok === '1';
 
   return (
-    // h-dvh = altura DEFINIDA (viewport). Necesaria para que el mapa (h-full)
-    // resuelva su altura; con flex-1/min-h-full heredaria 0 y el heatmap
-    // reventaria (getImageData sobre canvas de alto 0).
     <main className="flex h-dvh flex-col">
-      <header className="flex items-center justify-between px-4 py-3">
-        <div>
-          <h1 className="text-lg font-bold">Parakeet</h1>
-          <p className="text-xs text-neutral-500">
-            Mapa de puntos contaminados
-          </p>
+      <header className="flex items-center justify-between border-b border-brand-soft/70 bg-white/70 px-4 py-3 backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand text-base text-white shadow-[0_6px_14px_-4px_rgba(16,148,45,0.6)]">
+            🦜
+          </span>
+          <div>
+            <h1 className="text-lg font-bold leading-none text-brand-dark">
+              Parakeet
+            </h1>
+            <p className="text-[11px] text-muted">Mapa de puntos contaminados</p>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="text-sm text-neutral-500 underline">
+        <div className="flex items-center gap-2">
+          <Link
+            href="/login"
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-brand-dark transition hover:bg-brand-tint"
+          >
             Ingresar
           </Link>
-          <Link
-            href="/reportar"
-            className="min-h-11 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
-          >
+          <Link href="/reportar" className="pk-btn pk-btn-accent px-4">
             + Reportar
           </Link>
         </div>
       </header>
 
       {reporteEnviado && (
-        <div className="mx-4 mb-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
+        <div className="mx-4 mt-3 rounded-xl border border-brand-soft bg-brand-tint px-3 py-2 text-sm font-medium text-brand-dark">
           ¡Reporte recibido! Tu zona ya está marcada en el mapa.
         </div>
       )}
 
-      <section className="relative min-h-0 flex-1">
-        <MapaPublico focusZonaId={sp.zona} />
+      <section className="relative min-h-0 flex-1 p-3">
+        <div className="h-full w-full overflow-hidden rounded-2xl border border-brand-soft/70 shadow-[0_10px_30px_-14px_rgba(0,99,65,0.3)]">
+          <MapaPublico focusZonaId={sp.zona} />
+        </div>
       </section>
 
-      <footer className="px-4 py-3 text-center text-xs text-neutral-400">
+      <footer className="px-4 pb-3 text-center text-xs text-muted">
         Turismo ecológico y sostenible · Reto EcoTrack
       </footer>
     </main>

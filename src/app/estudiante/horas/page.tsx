@@ -41,32 +41,34 @@ export default async function HorasPage() {
       <EncabezadoRol titulo="Mis horas" subtitulo={estudiante.institucion} />
 
       <div className="mx-auto w-full max-w-md flex-1 px-4 py-4">
-        <Link href="/estudiante" className="text-sm text-neutral-500 underline">
+        <Link href="/estudiante" className="text-sm font-medium text-brand-mid">
           ← Catálogo
         </Link>
 
         {/* Progreso */}
-        <section className="my-4 rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
+        <section className="my-4 rounded-2xl bg-gradient-to-br from-brand-dark to-brand p-5 text-white shadow-[0_14px_30px_-12px_rgba(0,99,65,0.5)]">
           <div className="flex items-end justify-between">
-            <span className="text-3xl font-bold">{acumuladas}</span>
-            <span className="text-sm text-neutral-500">de {requeridas} h</span>
+            <span className="text-4xl font-bold leading-none">{acumuladas}</span>
+            <span className="text-sm text-white/80">de {requeridas} h</span>
           </div>
-          <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+          <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-white/25">
             <div
-              className="h-full rounded-full bg-emerald-600 transition-all"
+              className="h-full rounded-full bg-white transition-all"
               style={{ width: `${pct}%` }}
             />
           </div>
-          <p className="mt-1 text-xs text-neutral-500">
+          <p className="mt-2 text-xs text-white/85">
             {restantes > 0 ? `Te faltan ${restantes} h` : '¡Horas completas! 🎉'}
           </p>
         </section>
 
         {/* Stamps */}
         <section className="mb-5">
-          <h2 className="mb-2 font-semibold">Stamps ({listaStamps.length})</h2>
+          <h2 className="mb-2 font-semibold text-brand-dark">
+            Stamps ({listaStamps.length})
+          </h2>
           {listaStamps.length === 0 ? (
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-muted">
               Aún no tenés stamps. Ganás uno al asistir a una jornada.
             </p>
           ) : (
@@ -77,7 +79,7 @@ export default async function HorasPage() {
                   <div
                     key={i}
                     title={ini?.nombre ?? s.tipo}
-                    className="flex aspect-square flex-col items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-center dark:border-emerald-900 dark:bg-emerald-950/40"
+                    className="flex aspect-square flex-col items-center justify-center rounded-2xl border border-brand-soft bg-brand-tint text-center"
                   >
                     <span className="text-2xl">🏅</span>
                   </div>
@@ -89,9 +91,9 @@ export default async function HorasPage() {
 
         {/* Historial */}
         <section>
-          <h2 className="mb-2 font-semibold">Historial</h2>
+          <h2 className="mb-2 font-semibold text-brand-dark">Historial</h2>
           {historial.length === 0 ? (
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-muted">
               Todavía no te inscribiste a ninguna iniciativa.
             </p>
           ) : (
@@ -102,17 +104,23 @@ export default async function HorasPage() {
                 return (
                   <li
                     key={h.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-800"
+                    className="flex items-center justify-between gap-2 rounded-xl border border-brand-soft/70 bg-white px-3 py-2.5 text-sm"
                   >
                     <div className="min-w-0">
-                      <div className="truncate font-medium">
+                      <div className="truncate font-medium text-ink">
                         {ini?.nombre ?? 'Iniciativa'}
                       </div>
-                      <div className="text-xs text-neutral-500">
+                      <div className="text-xs text-muted">
                         {ini?.fecha_jornada}
                       </div>
                     </div>
-                    <span className="shrink-0 text-xs">
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        asis?.asistio
+                          ? 'bg-brand text-white'
+                          : 'bg-brand-tint text-brand-dark'
+                      }`}
+                    >
                       {asis?.asistio
                         ? `✓ +${asis.horas_acreditadas} h`
                         : 'Inscrito'}

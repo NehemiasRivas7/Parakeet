@@ -11,7 +11,7 @@ const SelectorUbicacion = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-sm text-neutral-500">
+      <div className="flex h-full w-full items-center justify-center bg-brand-tint text-sm text-muted">
         Cargando mapa…
       </div>
     ),
@@ -58,8 +58,7 @@ export default function FormIniciativa({
   const tipoCausaFinal =
     categoria === CATEGORIA_OTRO ? categoriaOtro : categoria;
 
-  const inputCls =
-    'min-h-11 w-full rounded-xl border border-neutral-300 bg-transparent px-3 dark:border-neutral-600';
+  const inputCls = 'pk-input';
 
   return (
     <form
@@ -67,14 +66,14 @@ export default function FormIniciativa({
       className="mx-auto flex w-full max-w-md flex-1 flex-col gap-3 px-4 py-4"
     >
       {huboError && (
-        <p className="rounded-lg bg-red-50 p-2 text-sm text-red-700 dark:bg-red-950/50">
+        <p className="rounded-xl bg-accent-soft/60 p-2.5 text-sm font-medium text-accent">
           Revisá los campos: todos son obligatorios y los números deben ser
           válidos.
         </p>
       )}
 
       {initial.zonaNombre && (
-        <p className="rounded-lg bg-sky-50 p-2 text-sm text-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
+        <p className="rounded-xl bg-brand-tint p-2.5 text-sm text-brand-dark">
           Zona: <strong>{initial.zonaNombre}</strong> — ubicación heredada.
         </p>
       )}
@@ -82,8 +81,8 @@ export default function FormIniciativa({
       {modo === 'editar' && <input type="hidden" name="id" value={id} />}
 
       {/* Ubicación con mapa chico */}
-      <label className="text-sm font-semibold">Ubicación</label>
-      <div className="h-52 w-full overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
+      <label className="text-sm font-semibold text-brand-dark">Ubicación</label>
+      <div className="h-52 w-full overflow-hidden rounded-2xl border border-brand-soft/70">
         <SelectorUbicacion
           lat={coords.lat}
           lng={coords.lng}
@@ -91,7 +90,7 @@ export default function FormIniciativa({
           onChange={(lat, lng) => setCoords({ lat, lng })}
         />
       </div>
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-muted">
         {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)} — movés el pin o tocás el
         mapa para ajustar.
       </p>
@@ -101,7 +100,7 @@ export default function FormIniciativa({
       <input type="hidden" name="zona_id" value={initial.zonaId ?? ''} />
       <input type="hidden" name="tipo_causa" value={tipoCausaFinal} />
 
-      <label className="text-sm font-semibold">Nombre</label>
+      <label className="text-sm font-semibold text-brand-dark">Nombre</label>
       <input
         name="nombre"
         required
@@ -110,17 +109,17 @@ export default function FormIniciativa({
         className={inputCls}
       />
 
-      <label className="text-sm font-semibold">Descripción</label>
+      <label className="text-sm font-semibold text-brand-dark">Descripción</label>
       <textarea
         name="descripcion"
         required
         rows={3}
         placeholder="¿Qué se hará en la jornada?"
         defaultValue={initial.descripcion}
-        className="w-full rounded-xl border border-neutral-300 bg-transparent p-3 dark:border-neutral-600"
+        className="pk-input py-2.5"
       />
 
-      <label className="text-sm font-semibold">Categoría</label>
+      <label className="text-sm font-semibold text-brand-dark">Categoría</label>
       <select
         value={categoria}
         onChange={(e) => setCategoria(e.target.value)}
@@ -147,7 +146,7 @@ export default function FormIniciativa({
         />
       )}
 
-      <label className="text-sm font-semibold">Fecha de la jornada</label>
+      <label className="text-sm font-semibold text-brand-dark">Fecha de la jornada</label>
       <input
         name="fecha_jornada"
         type="date"
@@ -158,7 +157,7 @@ export default function FormIniciativa({
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm font-semibold">Cupo</label>
+          <label className="text-sm font-semibold text-brand-dark">Cupo</label>
           <input
             name="cupo_max"
             type="number"
@@ -170,7 +169,7 @@ export default function FormIniciativa({
           />
         </div>
         <div>
-          <label className="text-sm font-semibold">Horas sociales</label>
+          <label className="text-sm font-semibold text-brand-dark">Horas sociales</label>
           <input
             name="horas_otorgadas"
             type="number"
@@ -183,7 +182,7 @@ export default function FormIniciativa({
         </div>
       </div>
 
-      <label className="text-sm font-semibold">Monto requerido (USD)</label>
+      <label className="text-sm font-semibold text-brand-dark">Monto requerido (USD)</label>
       <input
         name="monto_requerido"
         type="number"
@@ -198,11 +197,11 @@ export default function FormIniciativa({
       <div className="mt-2 flex gap-2">
         <Link
           href="/organizacion"
-          className="flex min-h-12 flex-1 items-center justify-center rounded-xl border border-neutral-300 text-sm font-semibold dark:border-neutral-600"
+          className="pk-btn pk-btn-outline min-h-12 flex-1"
         >
           Cancelar
         </Link>
-        <button className="min-h-12 flex-1 rounded-xl bg-emerald-600 px-4 font-semibold text-white">
+        <button className="pk-btn pk-btn-primary min-h-12 flex-1">
           {modo === 'editar' ? 'Guardar cambios' : 'Guardar borrador'}
         </button>
       </div>

@@ -58,13 +58,13 @@ export default function MapaIniciativas({
         <Marker key={ini.id} position={[ini.lat, ini.lng]} icon={pin}>
           <Popup>
             <div className="text-sm">
-              <div className="font-semibold">{ini.nombre}</div>
-              <div className="text-neutral-500">
+              <div className="font-semibold text-brand-dark">{ini.nombre}</div>
+              <div className="text-muted">
                 {ini.horas_otorgadas} h · {ini.cupos_restantes} cupos
               </div>
               <Link
                 href={`${hrefBase}/${ini.id}`}
-                className="text-emerald-700 underline"
+                className="font-medium text-brand-dark underline"
               >
                 {cta}
               </Link>

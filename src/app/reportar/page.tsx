@@ -12,14 +12,14 @@ const SelectorUbicacion = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-sm text-neutral-500">
+      <div className="flex h-full w-full items-center justify-center bg-brand-tint text-sm text-muted">
         Cargando mapa…
       </div>
     ),
   },
 );
 
-const CENTRO_DEFAULT = { lat: 13.4936, lng: -89.3823 }; // Playa El Tunco
+const CENTRO_DEFAULT = { lat: 13.4936, lng: -89.3823 };
 
 export default function ReportarPage() {
   const router = useRouter();
@@ -33,23 +33,11 @@ export default function ReportarPage() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  function pedirUbicacion() {
     if (!('geolocation' in navigator)) {
       setGeoEstado('noSoportada');
       return;
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setRecenterKey((k) => k + 1);
-        setGeoEstado('ok');
-      },
-      () => setGeoEstado('denegada'),
-      { enableHighAccuracy: true, timeout: 8000 },
-    );
-  }, []);
-
-  function usarMiUbicacion() {
     setGeoEstado('buscando');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -61,6 +49,11 @@ export default function ReportarPage() {
       { enableHighAccuracy: true, timeout: 8000 },
     );
   }
+
+  useEffect(() => {
+    pedirUbicacion();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function enviar() {
     if (!tipo) {
@@ -92,22 +85,26 @@ export default function ReportarPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-5">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 py-5">
       <header className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Reportar punto contaminado</h1>
-        <Link href="/" className="text-sm text-neutral-500 underline">
+        <h1 className="text-xl font-bold text-brand-dark">
+          Reportar punto contaminado
+        </h1>
+        <Link href="/" className="text-sm font-medium text-muted hover:text-accent">
           Cancelar
         </Link>
       </header>
 
-      <p className="text-sm text-neutral-500">
+      <p className="-mt-2 text-sm text-muted">
         Sin registro. Ubicá el punto, elegí el tipo y enviá.
       </p>
 
       {/* 1. Ubicación */}
       <section className="flex flex-col gap-2">
-        <label className="text-sm font-semibold">1. Ubicación</label>
-        <div className="h-56 w-full overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
+        <label className="text-sm font-semibold text-brand-dark">
+          1. Ubicación
+        </label>
+        <div className="h-56 w-full overflow-hidden rounded-2xl border border-brand-soft/70 shadow-[0_8px_24px_-14px_rgba(0,99,65,0.25)]">
           <SelectorUbicacion
             lat={coords.lat}
             lng={coords.lng}
@@ -115,29 +112,26 @@ export default function ReportarPage() {
             onChange={(lat, lng) => setCoords({ lat, lng })}
           />
         </div>
-        <div className="flex items-center justify-between text-xs text-neutral-500">
+        <div className="flex items-center justify-between text-xs text-muted">
           <span>
             {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
           </span>
           <button
             type="button"
-            onClick={usarMiUbicacion}
-            className="underline"
+            onClick={pedirUbicacion}
+            className="font-medium text-brand-mid hover:text-brand-dark"
           >
             Usar mi ubicación
           </button>
         </div>
-        {geoEstado === 'buscando' && (
-          <p className="text-xs text-neutral-400">Buscando tu ubicación…</p>
-        )}
         {geoEstado === 'denegada' && (
-          <p className="text-xs text-amber-600">
+          <p className="text-xs text-accent">
             No pudimos acceder a tu ubicación. Movés el pin o tocás el mapa para
             ajustarla.
           </p>
         )}
         {geoEstado === 'noSoportada' && (
-          <p className="text-xs text-amber-600">
+          <p className="text-xs text-accent">
             Tu navegador no soporta geolocalización. Tocá el mapa para marcar el
             punto.
           </p>
@@ -146,35 +140,30 @@ export default function ReportarPage() {
 
       {/* 2. Tipo */}
       <section className="flex flex-col gap-2">
-        <label className="text-sm font-semibold">2. Tipo de contaminación</label>
+        <label className="text-sm font-semibold text-brand-dark">
+          2. Tipo de contaminación
+        </label>
         <div className="flex flex-wrap gap-2">
-          {TIPOS_CONTAMINACION.map((t) => {
-            const activo = tipo === t.value;
-            return (
-              <button
-                key={t.value}
-                type="button"
-                onClick={() => setTipo(t.value)}
-                aria-pressed={activo}
-                className={`flex min-h-11 items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition ${
-                  activo
-                    ? 'border-emerald-600 bg-emerald-600 text-white'
-                    : 'border-neutral-300 bg-transparent dark:border-neutral-600'
-                }`}
-              >
-                <span>{t.emoji}</span>
-                {t.label}
-              </button>
-            );
-          })}
+          {TIPOS_CONTAMINACION.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              onClick={() => setTipo(t.value)}
+              aria-pressed={tipo === t.value}
+              className={`pk-chip ${tipo === t.value ? 'pk-chip-active' : ''}`}
+            >
+              <span>{t.emoji}</span>
+              {t.label}
+            </button>
+          ))}
         </div>
       </section>
 
       {/* 3. Descripción */}
       <section className="flex flex-col gap-2">
-        <label htmlFor="desc" className="text-sm font-semibold">
+        <label htmlFor="desc" className="text-sm font-semibold text-brand-dark">
           3. Descripción{' '}
-          <span className="font-normal text-neutral-400">(opcional)</span>
+          <span className="font-normal text-muted">(opcional)</span>
         </label>
         <textarea
           id="desc"
@@ -182,13 +171,13 @@ export default function ReportarPage() {
           onChange={(e) => setDescripcion(e.target.value)}
           maxLength={500}
           rows={3}
-          placeholder="¿Qué viste? (opcional)"
-          className="w-full rounded-xl border border-neutral-300 bg-transparent p-3 text-sm dark:border-neutral-600"
+          placeholder="¿Qué viste?"
+          className="pk-input py-2.5"
         />
       </section>
 
       {error && (
-        <p className="rounded-lg bg-red-50 p-2 text-sm text-red-700 dark:bg-red-950/50">
+        <p className="rounded-xl bg-accent-soft/60 px-3 py-2 text-sm font-medium text-accent">
           {error}
         </p>
       )}
@@ -197,7 +186,7 @@ export default function ReportarPage() {
         type="button"
         onClick={enviar}
         disabled={enviando}
-        className="mt-1 min-h-12 rounded-xl bg-emerald-600 px-4 py-3 text-base font-semibold text-white transition disabled:opacity-60"
+        className="pk-btn pk-btn-accent min-h-12 text-base"
       >
         {enviando ? 'Enviando…' : 'Enviar reporte'}
       </button>
